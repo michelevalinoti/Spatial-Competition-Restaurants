@@ -634,7 +634,7 @@ class GrubhubClient:
                 df_CT = delivery_network.loc[delivery_network.BoroCT2020.isin(touch_CT),:]
                 
                 if len(df_CT) < 20:
-                    
+                    f
                     touch_CT = touching_CT_2.loc[touching_CT.BoroCT2020==CT, :]==1
                     touch_CT = touch_CT.T
                     touch_CT = list(touch_CT.loc[touch_CT[touch_CT.columns[0]]==1].index)

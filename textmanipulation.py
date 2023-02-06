@@ -5,7 +5,7 @@ Created on Sat Feb  4 13:52:13 2023
 
 @author: michelev
 """
-
+#see this
 import pandas as pd
 import numpy as np
 import os
@@ -158,12 +158,15 @@ class TextManipulation:
         ingredients_df = pd.read_csv(self.machine + self.yelp_folder + 'ingredients_' + 'dataframe_' + date + '.csv', index_col=[0])
         
         text_df = {'categories': categories_df, 'sections': sections_df, 'items': items_df, 'ingredients': ingredients_df}
+        similarity_matrices = {}
         
         del categories_df, sections_df, items_df, ingredients_df
         
         for text_key in text_df.keys():
             
-            similarity_matrix = 1-squareform(pdist(text_df[text_key], 'cosine'))
+            similarity_matrices[text_key] = 1-squareform(pdist(text_df[text_key], 'cosine'))
+            
+            text_df[text_key].index
 #%%
 def main():
     
