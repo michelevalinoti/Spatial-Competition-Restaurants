@@ -12,7 +12,7 @@ import numpy as np
 
 from datetime import date
 
-from grubhub1 import GrubhubClient
+from grubhub import GrubhubClient
 from geo import GeoData
 
 from concurrent.futures import ThreadPoolExecutor
@@ -22,7 +22,7 @@ import os.path
 
 import re
 
-#from yelp import YelpClient
+from yelp import YelpClient
 
 import matplotlib.pyplot as plt
 
@@ -282,7 +282,7 @@ RD = RetrieveData()
 RD.setCityLocations()
 with ThreadPoolExecutor(max_workers=5) as executor:
     executor.map(lambda row: RD.retrieveGrubHubByCT(row, '01-31-2023'),
-                 list(range(2100,2325)),
+                 RD.locations.index,
                  #list(range(1400)),
                  #list(range(1800)),
                 timeout = 3600)
