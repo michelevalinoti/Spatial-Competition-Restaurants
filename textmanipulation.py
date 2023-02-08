@@ -13,6 +13,7 @@ from collections import Counter, defaultdict
 from nltk.util import ngrams
 from itertools import chain
 from scipy.spatial.distance import pdist, squareform
+from scipy.sparse import csr_matrix, save_npz, load_npz
 
 import Base
 #%%
@@ -41,7 +42,7 @@ class TextManipulation:
         
     def createCorpus(self, date, end):
         
-        corpusExists = os.path.exists(self.machine + self.yelp_folder + 'categories_' + 'dataframe_' + date + '.csv')
+        corpusExists = os.path.exists(self.machine + self.yelp_folder + 'menus/analysis/' + 'categories_' + 'dataframe_' + date + '.csv')
         
         if not corpusExists:
             categories_df = pd.DataFrame()
@@ -49,16 +50,24 @@ class TextManipulation:
             items_df = pd.DataFrame()
             ingredients_df = pd.DataFrame()
         else:
-            categories_df = pd.read_csv(self.machine + self.yelp_folder + 'categories_' + 'dataframe_' + date + '.csv', index_col=[0])
-            sections_df = pd.read_csv(self.machine + self.yelp_folder + 'sections_' + 'dataframe_' + date + '.csv', index_col=[0])
-            items_df = pd.read_csv(self.machine + self.yelp_folder + 'items_' + 'dataframe_' + date + '.csv', index_col=[0])
-            ingredients_df = pd.read_csv(self.machine + self.yelp_folder + 'ingredients_' + 'dataframe_' + date + '.csv', index_col=[0])
+            categories_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'categories_' + 'dataframe_' + date + '.csv', index_col=[0])
+            sections_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'sections_' + 'dataframe_' + date + '.csv', index_col=[0])
+            items_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'items_' + 'dataframe_' + date + '.csv', index_col=[0])
+            ingredients_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' +'ingredients_' + 'dataframe_' + date + '.csv', index_col=[0])
             
         count=0
         for key in list(self.menus.keys())[:end]:
             
             if count%100==0:
                 print('Processing rest. no. ' + str(count))
+                
+            if corpusExists:
+            
+                processedRestaurants = np.loadtxt(self.machine + self.yelp_folder + 'menus/analysis/' + 'categories' + '_indices.txt', dtype=str)
+                if key in processedRestaurants:
+                    
+                    print('Restaurant already processed.')
+                    continue
             
             # CATEGORIES
             if not self.menus[key].categories.isnull().sum()==len(self.menus[key]):
@@ -144,18 +153,18 @@ class TextManipulation:
         
             count +=1
              
-        categories_df.to_csv(self.machine + self.yelp_folder + 'categories_' + 'dataframe_' + date + '.csv')
-        sections_df.to_csv(self.machine + self.yelp_folder + 'sections_' + 'dataframe_' + date + '.csv')
-        items_df.to_csv(self.machine + self.yelp_folder + 'items_' + 'dataframe_' + date + '.csv')
-        ingredients_df.to_csv(self.machine + self.yelp_folder + 'ingredients_' + 'dataframe_' + date + '.csv')
+        categories_df.to_csv(self.machine + self.yelp_folder + 'menus/analysis/' +'categories_' + 'dataframe_' + date + '.csv')
+        sections_df.to_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'sections_' + 'dataframe_' + date + '.csv')
+        items_df.to_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'items_' + 'dataframe_' + date + '.csv')
+        ingredients_df.to_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'ingredients_' + 'dataframe_' + date + '.csv')
                 
     def computeSimilarities(self, date, weights):
         
         # define datasets
-        categories_df = pd.read_csv(self.machine + self.yelp_folder + 'categories_' + 'dataframe_' + date + '.csv', index_col=[0])
-        sections_df = pd.read_csv(self.machine + self.yelp_folder + 'sections_' + 'dataframe_' + date + '.csv', index_col=[0])
-        items_df = pd.read_csv(self.machine + self.yelp_folder + 'items_' + 'dataframe_' + date + '.csv', index_col=[0])
-        ingredients_df = pd.read_csv(self.machine + self.yelp_folder + 'ingredients_' + 'dataframe_' + date + '.csv', index_col=[0])
+        categories_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'categories_' + 'dataframe_' + date + '.csv', index_col=[0])
+        sections_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'sections_' + 'dataframe_' + date + '.csv', index_col=[0])
+        items_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'items_' + 'dataframe_' + date + '.csv', index_col=[0])
+        ingredients_df = pd.read_csv(self.machine + self.yelp_folder + 'menus/analysis/' + 'ingredients_' + 'dataframe_' + date + '.csv', index_col=[0])
         
         text_df = {'categories': categories_df, 'sections': sections_df, 'items': items_df, 'ingredients': ingredients_df}
         similarity_matrices = {}
@@ -164,15 +173,21 @@ class TextManipulation:
         
         for text_key in text_df.keys():
             
+            text_df[text_key] = text_df[text_key].fillna(0)
             similarity_matrices[text_key] = 1-squareform(pdist(text_df[text_key], 'cosine'))
+            similarity_matrices[text_key][np.isnan(similarity_matrices[text_key])] = 0
             
-            text_df[text_key].index
+            save_npz(self.machine + self.yelp_folder + 'menus/analysis/' + text_key + '_sparse_matrix.npz', csr_matrix(similarity_matrices[text_key]))
+            np.savetxt(self.machine + self.yelp_folder + 'menus/analysis/' + text_key + '_indices.txt', text_df[text_key].index, fmt="%s")
+            
+            
 #%%
+
 def main():
     
     TM = TextManipulation()
     TM.loadMenus()
-    TM.createCorpus('01-31-2023', 1000)
+    TM.createCorpus('01-31-2023', 2000)
     
 main()
             #     section_list = list(chain.from_iterable(self.menus[key].section))

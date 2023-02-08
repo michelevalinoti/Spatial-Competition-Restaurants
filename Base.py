@@ -62,7 +62,7 @@ def getExtension(filename):
     
 #C
 # Find census tract of every resturant of the dataframe
-def findCensusTracts(self, data, id_column, output_folder):
+def findCensusTracts(self, data, id_column, output_folder, date):
     
     # create a dataframe of all restaurants and all census tracts
     restaurant_census = pd.DataFrame(index=data.index, columns=self.census_gpd['BoroCT2020'])
@@ -112,9 +112,13 @@ def findCensusTracts(self, data, id_column, output_folder):
             print('Evaluating census tract #: ' +str(np.where(restaurant_census_missing.columns==col)[0][0]))
            
     restaurant_census.loc[restaurant_census_missing.index,:] = restaurant_census_missing
+    
     # check whether all the restaurants have been matched with only one census tract
     data = data[restaurant_census.sum(1)>0] # 
     data = data[restaurant_census.sum(1)<2] #
+    
+    restaurant_census = restaurant_census[restaurant_census.sum(1)>0] # 
+    restaurant_census = restaurant_census[restaurant_census.sum(1)<2] #
     
     # create (and save) dataframe of restaurants in each census tract from the initial matrix
     #census_w_restaurants = pd.Series(restaurant_census.sum(0), name=column_name)
@@ -124,8 +128,11 @@ def findCensusTracts(self, data, id_column, output_folder):
     sparse_rc = csr_matrix(restaurant_census)
     census_of_rests_idx = sparse_rc.nonzero()[1]
     corresponding_rests = self.census_gpd['BoroCT2020'].iloc[census_of_rests_idx]
-    census_of_rests = pd.DataFrame({'restaurant_id': data.restaurant_id.values, 'BoroCT2020': corresponding_rests.values})
-    census_of_rests.to_csv(output_folder + 'census_tract_of_restaurants.csv')
+    census_of_rests = pd.DataFrame({'restaurant_id': data.index, 'BoroCT2020': corresponding_rests.values})
+    census_of_rests['Artificial_BoroCT2020'] = False
+    census_of_rests.loc[restaurant_census_missing.index,'Artificial_BoroCT2020'] = True
+    
+    census_of_rests.to_csv(output_folder + 'census_tract_of_restaurants_' + date + '.csv')
   
     # join the tables above
     data = data.merge(census_of_rests,on='restaurant_id')

@@ -34,7 +34,7 @@ import dask.dataframe as dd
 
 import Base
 from geo import GeoData
-
+import geopandas as gpd
 #%%
 
 class GrubhubClient:
@@ -60,6 +60,7 @@ class GrubhubClient:
     census_filename = 'census_tracts.shp'
     centroids_filename = 'census_tracts_centroids.shp'
     
+    census_gpd = gpd.read_file(machine + census_folder + census_filename)
     SORT_MODES = ['default', # (Default)
                   'restaurant_name', # Sort search results by (Restaurant Name)
                   'price', # " (Price (Ascending))
@@ -348,29 +349,29 @@ class GrubhubClient:
         df = df.drop_duplicates(subset=['restaurant_id', 'merchant_id'])
         df.to_csv(self.machine + self.folder + self.output_folder + date + '/' + self.file_name + '.csv')
 
-    def getCensusTractsData(self):
+    # def getCensusTractsData(self):
         
-        path_folder = self.machine +  self.folder + self.output_folder
+    #     path_folder = self.machine +  self.folder + self.output_folder
         
-        no_restaurants = {}
-        counter=0
-        for filename in os.listdir(path_folder):
+    #     no_restaurants = {}
+    #     counter=0
+    #     for filename in os.listdir(path_folder):
             
-            if Base.getExtension(filename) == 'csv':
+    #         if Base.getExtension(filename) == 'csv':
                 
-                census_tract = Base.getCTFromFileName(filename)
-                no_restaurants[census_tract] = len(pd.read_csv(path_folder + filename))
+    #             census_tract = Base.getCTFromFileName(filename)
+    #             no_restaurants[census_tract] = len(pd.read_csv(path_folder + filename))
                 
-                counter +=1
-                if (counter%100)==0:
-                    print(counter)
+    #             counter +=1
+    #             if (counter%100)==0:
+    #                 print(counter)
                     
-        census_w_restaurants = pd.DataFrame(no_restaurants.items(), columns=['BoroCT2020', 'NumberGHDeliveringRestaurants'])
-        census_w_restaurants.to_csv(self.machine + self.folder + self.analysis_folder + 'delivering_restaurants_in_tracts.csv')
+    #     census_w_restaurants = pd.DataFrame(no_restaurants.items(), columns=['BoroCT2020', 'NumberGHDeliveringRestaurants'])
+    #     census_w_restaurants.to_csv(self.machine + self.folder + self.analysis_folder + 'delivering_restaurants_in_tracts.csv')
         
-    def getUniqueRestaurants(self):
+    def getUniqueRestaurants(self, date):
         
-        path_folder = self.machine +  self.folder + self.output_folder
+        path_folder = self.machine +  self.folder + self.output_folder + date + '/'
         
         cols = ['restaurant_id',
                 'merchant_id',
@@ -416,14 +417,15 @@ class GrubhubClient:
         id_column = 'restaurant_id'
         output_folder = self.machine + self.folder + self.analysis_folder
         
-        allRestaurants = Base.findCensusTracts(self, allRestaurants, id_column, output_folder)
-        allRestaurants.to_csv(self.machine + self.folder + self.analysis_folder + 'restaurants_delivering_from_tracts.csv')
-        
-        self.GH_data = allRestaurants
+        allRestaurants.set_index('restaurant_id', inplace=True)
+        allRestaurants = Base.findCensusTracts(self, allRestaurants, id_column, output_folder, date)
+        #allRestaurants.to_csv(self.machine + self.folder + self.analysis_folder + 'restaurants_delivering_from_tracts.csv')
+        allRestaurants.to_csv(self.machine + self.folder + self.analysis_folder + 'unique_restaurants_' + date + '.csv')
+
     
     def getNetworkRestaurantData(self):
         
-        path_folder = self.machine +  self.folder + self.output_folder
+        path_folder = self.machine +  self.folder + self.output_folder + date + '/'
         
         cols = ['restaurant_id', 'merchant_id', 'pickup', 'pickup_time_estimate', 'distance_from_location', 'delivery_time_estimate',
                 'delivery_time_estimate_lower_bound', 'delivery_time_estimate_upper_bound', 'delivery_fee', 'service_fee']
@@ -444,7 +446,6 @@ class GrubhubClient:
                 restaurants_CT['census_tract'] = census_tract
                 allRestaurants = pd.concat((allRestaurants, restaurants_CT), axis=0, ignore_index=True)
             
-                #allRestaurants = allRestaurants.drop_duplicates(subset=['restaurant_id', 'merchant_id'])
             counter +=1
             if (counter%100)==0:
                 print(counter)
@@ -453,7 +454,7 @@ class GrubhubClient:
         id_column = 'restaurant_id'
         output_folder = self.machine + self.folder + self.analysis_folder
         allRestaurants = Base.findCensusTracts(self, allRestaurants, id_column, output_folder)
-        allRestaurants.to_csv(self.machine + self.folder + self.analysis_folder + 'census-specific-data.csv')
+        allRestaurants.to_csv(self.machine + self.folder + self.analysis_folder + 'census-specific-data_' + date + '.csv')
         
     def writeSummaryUnique(self):
         
@@ -516,7 +517,7 @@ class GrubhubClient:
         tex_file = open(file_name, 'w')
         tex_file.write(summary.to_latex(sparsify = True,
                                         caption = '',
-                                        label = 'tab:summary_yelp'))
+                                        label = 'tab:summary_grubhub'))
         tex_file.close()
             
             
@@ -827,3 +828,11 @@ class GrubhubClient:
 
         see = delivery_network_all.groupby('BoroName').median()
         see = delivery_network_full.groupby('BoroName').median()
+        
+#%%
+def main():
+    
+    GH = GrubhubClient()
+    GH.getUniqueRestaurants('01-31-2023')
+        
+#main()

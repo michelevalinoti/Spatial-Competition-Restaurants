@@ -22,7 +22,7 @@ import os.path
 
 import re
 
-from yelp import YelpClient
+#from yelp import YelpClient
 
 import matplotlib.pyplot as plt
 

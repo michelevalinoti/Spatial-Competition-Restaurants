@@ -769,8 +769,11 @@ class YelpClient():
             if len(menu_dict['categories'])==0:
                 for key in menu_dict.keys():
                     
-                    menu_dict[key]=None
-                menu_dict['categories'] = categories
+                    if key!='categories':
+                        menu_dict[key].append(None)
+                    else:
+                        menu_dict['categories'].append(categories)
+                
             menu_df = pd.DataFrame(menu_dict)
             
             
@@ -1636,9 +1639,10 @@ def main():
     
     # with ThreadPoolExecutor(max_workers=5) as executor:
     #     executor.map(lambda start: YP.addEstablishmentYears(start),
-    #                   list(np.arange(30000, 40000, 100)),
+    #                   list(np.arange(0, len(YP.retrieveData()), 100)),
     #                   timeout = 3600)
         
+    #YP.aggregateData(False)
     
     with ThreadPoolExecutor(max_workers=5) as executor:
         executor.map(YP.findMenu,
@@ -1646,7 +1650,7 @@ def main():
                       timeout = 3600)
 
           
-    #YP.aggregateData(False)
+    
     
     #YP.yelp_data = YP.yelp_data.sort_index(axis=0)
     #YP.yelp_data.categories = YP.yelp_data.categories.apply(lambda x: sorted(x))
