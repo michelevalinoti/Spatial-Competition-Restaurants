@@ -111,6 +111,7 @@ def findCensusTracts(self, data, id_column, output_folder, date):
         if (np.where(restaurant_census_missing.columns==col)[0][0])%100==0:
             print('Evaluating census tract #: ' +str(np.where(restaurant_census_missing.columns==col)[0][0]))
            
+    
     restaurant_census.loc[restaurant_census_missing.index,:] = restaurant_census_missing
     
     # check whether all the restaurants have been matched with only one census tract
@@ -130,13 +131,16 @@ def findCensusTracts(self, data, id_column, output_folder, date):
     corresponding_rests = self.census_gpd['BoroCT2020'].iloc[census_of_rests_idx]
     census_of_rests = pd.DataFrame({'restaurant_id': data.index, 'BoroCT2020': corresponding_rests.values})
     census_of_rests['Artificial_BoroCT2020'] = False
-    census_of_rests.loc[restaurant_census_missing.index,'Artificial_BoroCT2020'] = True
+    census_of_rests.set_index(id_column, inplace=True)
+    restaurant_census_missing_new_indices = np.intersect1d(restaurant_census.index, restaurant_census_missing.index)
+
+    census_of_rests.loc[restaurant_census_missing_new_indices,'Artificial_BoroCT2020'] = True
     
     census_of_rests.to_csv(output_folder + 'census_tract_of_restaurants_' + date + '.csv')
   
     # join the tables above
     data = data.merge(census_of_rests,on='restaurant_id')
-    data.set_index(id_column, inplace=True)
+    #data.set_index(id_column, inplace=True)
     return data
 
 def standardizeTextColumn(item, remove_stopwords = True, stemming = True):
