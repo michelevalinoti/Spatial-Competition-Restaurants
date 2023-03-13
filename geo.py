@@ -74,9 +74,13 @@ class GeoData:
             
         distances.to_csv(self.machine + self.distances_folder + 'centroids_distances.csv')
      
-    def computePolygonfDistances(self):
+    def computePolygonfDistances(self, year = 2020):
         
-        census_df = self.census_df.geometry.set_crs(self.CRS_LATLON).to_crs(self.CRS_M, allow_override=True)
+        census_df = gpd.read_file(self.machine + 'nyc_geodata/census_tracts_boundaries/nyct' + str(year) + '_23a/nyct' + str(year) + '.shp')
+        census_df = census_df.set_index('BoroCT' + str(year))
+        self.census_df = census_df
+        
+        census_df = census_df.geometry.set_crs(self.census_df.crs, allow_override=True).to_crs(self.CRS_M)
         euclidean_distances = pd.DataFrame(columns = self.census_df.index, index = self.census_df.index)
         hausdorff_distances = pd.DataFrame(columns = self.census_df.index, index = self.census_df.index)
         
@@ -90,8 +94,8 @@ class GeoData:
             ct_idx += 1
             
         
-        euclidean_distances.to_csv(self.machine + self.distances_folder + 'euclidean_distances.csv')
-        hausdorff_distances.to_csv(self.machine + self.distances_folder + 'hausdorff_distances.csv')
+        euclidean_distances.to_csv(self.machine + self.distances_folder + 'euclidean_distances_' + str(year) + '.csv')
+        hausdorff_distances.to_csv(self.machine + self.distances_folder + 'hausdorff_distances_' + str(year) + '.csv')
         
         #cross_CT=pd.DataFrame(self.census_df.BoroName).merge(pd.DataFrame(self.census_df.BoroName).T, how='cross').set_index(self.census_df.index)
         
@@ -108,8 +112,8 @@ class GeoData:
         
         euclidean_distances_corrected[euclidean_distances_corrected==0] = 1
         
-        euclidean_distances_corrected.to_csv(self.machine + self.distances_folder + 'euclidean_distances_corrected.csv')
-        hausdorff_distances_corrected.to_csv(self.machine + self.distances_folder + 'hausdorff_distances_corrected.csv')
+        euclidean_distances_corrected.to_csv(self.machine + self.distances_folder + 'euclidean_distances_corrected_' + str(year) + '.csv')
+        hausdorff_distances_corrected.to_csv(self.machine + self.distances_folder + 'hausdorff_distances_corrected_' + str(year) + '.csv')
         
         
     def shortestPaths(self):
