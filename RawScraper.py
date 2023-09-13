@@ -28,8 +28,7 @@ from datetime import datetime
 #%%
 
 #?# copy proxies from text file (should not be public)
-proxies = {'http': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225',
-           'https': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225'}
+proxies = import_proxies()
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'}
 

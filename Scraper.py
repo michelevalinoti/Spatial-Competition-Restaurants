@@ -45,14 +45,11 @@ def getOpenerSERP(proxies):
         import six
         from six.moves.urllib import request
         opener = request.build_opener(
-            request.ProxyHandler(
-                {'http': 'http://brd-customer-hl_33f39684-zone-novserp:zf5trt1u8njy@zproxy.lum-superproxy.io:22225',
-                'https': 'http://brd-customer-hl_33f39684-zone-novserp:zf5trt1u8njy@zproxy.lum-superproxy.io:22225'}))
+            request.ProxyHandler(import_proxies()))
     if sys.version_info[0]==3:
         import urllib.request
         opener = urllib.request.build_opener(
             urllib.request.ProxyHandler(
-                {'http': 'http://brd-customer-hl_33f39684-zone-novserp:zf5trt1u8njy@zproxy.lum-superproxy.io:22225',
-                'https': 'http://brd-customer-hl_33f39684-zone-novserp:zf5trt1u8njy@zproxy.lum-superproxy.io:22225'}))
+                import_proxies()))
 
     return opener

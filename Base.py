@@ -36,6 +36,11 @@ from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 #%%
 
+def import_proxies():
+    
+    return ''
+
+
 def reshape_(matrix):
     
     return np.array(matrix.reshape(-1))[0]

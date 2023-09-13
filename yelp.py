@@ -556,9 +556,8 @@ class YelpClient():
             print('File already exists. Stop iteration.')
             return None
         
-        proxies = {'http': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225',
-                   'https': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225'}
-
+        proxies = import_proxies()
+        
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'}
 
         allRestaurants = pd.read_csv(self.machine + 'yelp_data/' + self.date + '/yelp_raw_data_' + self.date + '.csv', index_col = [0])
@@ -633,19 +632,18 @@ class YelpClient():
         
     def findMenu(self, start):
          
-         proxies = {'http': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225',
-                    'https': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225'}
+        proxies = import_proxies()
+        
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'}
 
-         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36'}
-
-         allRestaurants = pd.read_csv(self.machine + self.output_folder + self.date + '/yelp_raw_data_with_dates_' + self.date + '.csv', index_col = [0])
+        allRestaurants = pd.read_csv(self.machine + self.output_folder + self.date + '/yelp_raw_data_with_dates_' + self.date + '.csv', index_col = [0])
          
-         endpoint = min(start+100, len(allRestaurants))
-         allRestaurants = allRestaurants.iloc[start : endpoint]
+        endpoint = min(start+100, len(allRestaurants))
+        allRestaurants = allRestaurants.iloc[start : endpoint]
          
-         print('Parsing restaurant # ' + str(start))
+        print('Parsing restaurant # ' + str(start))
          
-         for row in allRestaurants.index:
+        for row in allRestaurants.index:
              
             
                 
