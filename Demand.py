@@ -28,8 +28,8 @@ machine = '/Users/michelev/spatial-competition-food/'
 foot_traffic_folder = 'advan_data/'
 
 
-un = "mv2164@nyu.edu" # Set username
-pw = "Fpdfqt6li2023!" # Set password
+#un =  # Set username
+#pw = # Set password
 
 credentials = f"{un}:{pw}" # Format credentials according to the API's expectations
 print(credentials)

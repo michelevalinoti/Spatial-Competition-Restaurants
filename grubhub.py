@@ -41,12 +41,7 @@ class GrubhubClient:
 
     session = None
     session_results = None
-    #proxies = {'http': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225',
-    #           'https': 'http://brd-customer-hl_33f39684-zone-zone1:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225'}
-    proxies ={'http': 'http://brd-customer-hl_33f39684-zone-zone1-country-us:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225',
-            'https': 'http://brd-customer-hl_33f39684-zone-zone1-country-us:9tzrgl2f2e55@zproxy.lum-superproxy.io:22225'}
-    #proxies = {'http': 'http://brd-customer-hl_33f39684-zone-residential:94evyj5kfwr5@zproxy.lum-superproxy.io:22225',
-    #        'https': 'http://brd-customer-hl_33f39684-zone-residential:94evyj5kfwr5@zproxy.lum-superproxy.io:22225'}
+    #proxies = {}
     restaurants = None
     file_name = None
     
